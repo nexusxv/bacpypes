@@ -53,6 +53,9 @@ from .basetypes import AccessCredentialDisable, AccessCredentialDisableReason, \
 from .apdu import EventNotificationParameters, ReadAccessSpecification, \
     ReadAccessResult
 
+from bacpypes import primitivedata
+
+
 # some debugging
 _debug = 0
 _log = ModuleLogger(globals())
@@ -134,7 +137,7 @@ def get_object_class(object_type, vendor_id=0):
 #
 
 @bacpypes_debugging
-def get_datatype(object_type, propid, vendor_id=0):
+def get_datatype(object_type, propid, vendor_id=0, propertyArrayIndex = None):
     """Return the datatype for the property of an object."""
     if _debug: get_datatype._debug("get_datatype %r %r vendor_id=%r", object_type, propid, vendor_id)
 
@@ -147,6 +150,14 @@ def get_datatype(object_type, propid, vendor_id=0):
     prop = cls._properties.get(propid)
     if not prop:
         return None
+
+    #If returns array or list, we need to find a type of element, in case of device not supporting segmentation
+    if (propertyArrayIndex != None):
+        if issubclass(prop.datatype, (Array, List)):  #(Atomic, Sequence, Choice, Array, List, AnyAtomic)
+            if (prop.datatype.subtype is primitivedata.ObjectIdentifier):
+                return primitivedata.Unsigned #if ObjectID Unsigned is used
+            else:
+                return prop.datatype.subtype    
 
     # return the datatype
     return prop.datatype
