@@ -143,7 +143,7 @@ def get_datatype(object_type, propid, vendor_id=0, propertyArrayIndex = None):
     # get the related class
     cls = get_object_class(object_type, vendor_id)
     if not cls:
-        return None  
+        return None
 
     # get the property
     prop = cls._properties.get(propid)
